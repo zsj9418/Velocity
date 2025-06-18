@@ -19,7 +19,7 @@ jobs:
           java-version: '17'
 
       - name: Build with Gradle
-        run: ./gradlew clean shadowJar
+        run: chmod +x gradlew && ./gradlew clean shadowJar
 
       - name: Prepare JAR
         id: prepare_jar
