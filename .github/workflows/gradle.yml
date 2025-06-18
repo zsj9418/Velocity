@@ -2,7 +2,7 @@ name: Build and Release Velocity
 
 on:
   push:
-    tags: ['*']  # 所有标签触发
+    tags: ['*']  
   workflow_dispatch:
 
 jobs:
@@ -35,7 +35,7 @@ jobs:
           path: velocity.jar
 
   release:
-    needs: build  # 无条件执行，只要build成功
+    needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: write 
