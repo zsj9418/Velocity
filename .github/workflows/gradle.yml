@@ -1,0 +1,53 @@
+name: Build and Release Velocity
+
+on:
+  push:
+    tags: ['*']  # 所有标签触发
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Build with Gradle
+        run: ./gradlew clean shadowJar
+
+      - name: Prepare JAR
+        id: prepare_jar
+        run: |
+          JAR_PATH=$(find proxy/build/libs -name "*.jar" ! -name "*sources*" ! -name "*javadoc*" | head -n 1)
+          cp "$JAR_PATH" ./velocity.jar
+          echo "JAR_SIZE=$(ls -lh ./velocity.jar | awk '{print $5}')" >> $GITHUB_OUTPUT
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: velocity-artifact
+          path: velocity.jar
+
+  release:
+    needs: build  # 无条件执行，只要build成功
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: velocity-artifact
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: velocity.jar
+          tag_name: ${{ github.ref_name }}
+          name: "Velocity ${{ github.ref_name }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
