@@ -37,6 +37,8 @@ jobs:
   release:
     needs: build  # 无条件执行，只要build成功
     runs-on: ubuntu-latest
+    permissions:
+      contents: write 
     steps:
       - name: Download Artifact
         uses: actions/download-artifact@v4
